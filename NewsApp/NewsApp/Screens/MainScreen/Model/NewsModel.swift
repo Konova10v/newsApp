@@ -29,14 +29,15 @@ struct DataClass: Codable {
 }
 
 // MARK: - News
-struct News: Codable {
+struct News: Codable, Identifiable {
 	let id: Int?
 	let title: String?
 	let img: String?
 	let localImg: String?
 	let newsDate: String?
 	let annotation: String?
-	let idResource, type: Int?
+	let idResource: Int?
+	let type: Int?
 	let newsDateUts: String?
 	let mobileURL: String?
 

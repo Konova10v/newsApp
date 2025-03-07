@@ -9,33 +9,32 @@ import Foundation
 
 class NetworkManager {
 	static let shared = NetworkManager()
-	private let baseURL = "http://dev.docker.otr-soft.ru:947/api/mobile/news/list"
 	
 	func getNews(completion: @escaping (Result<NewsModel, Error>) -> Void) {
-		guard let url = URL(string: baseURL) else {
-			completion(.failure(NSError(domain: "Invalid URL", code: 0, userInfo: nil)))
+		guard let url = URL(string: "http://dev.docker.otr-soft.ru:947/api/mobile/news/list") else {
+			completion(.failure(NSError(domain: "Invalid URL", code: -1, userInfo: nil)))
 			return
 		}
 		
-		URLSession.shared.dataTask(with: url) { data, response, error in
+		let task = URLSession.shared.dataTask(with: url) { data, response, error in
 			if let error = error {
 				completion(.failure(error))
 				return
 			}
 			
 			guard let data = data else {
-				completion(.failure(NSError(domain: "No data received", code: 0, userInfo: nil)))
+				completion(.failure(NSError(domain: "No data received", code: -2, userInfo: nil)))
 				return
 			}
 			
 			do {
-				let decoder = JSONDecoder()
-				decoder.keyDecodingStrategy = .convertFromSnakeCase
-				let newsResponse = try decoder.decode(NewsModel.self, from: data)
-				completion(.success(newsResponse))
+				let countries = try JSONDecoder().decode(NewsModel.self, from: data)
+				completion(.success(countries))
 			} catch {
 				completion(.failure(error))
 			}
-		}.resume()
+		}
+			
+		task.resume()
 	}
 }
