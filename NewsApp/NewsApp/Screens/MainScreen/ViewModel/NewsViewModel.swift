@@ -9,12 +9,24 @@ import Foundation
 
 final class NewsViewModel: ObservableObject {
 	let networkManager = NetworkManager.shared
+	let coreDataManager = CoreDataManager.shared
+	
 	@Published var newsData: NewsModel = .placeholder
 	
 	@Published var searchQuery: String = ""
 	
 	init() {
-		getNews()
+		loadNews()
+	}
+	
+	func loadNews() {
+		let savedNews = coreDataManager.fetchNews()
+		
+		if !savedNews.isEmpty {
+			self.newsData = NewsModel(success: true, data: DataClass(news: savedNews, count: savedNews.count, errorMsg: nil))
+		} else {
+			getNews()
+		}
 	}
 
 	// Получение всех новостей
@@ -24,6 +36,8 @@ final class NewsViewModel: ObservableObject {
 				switch result {
 				case .success(let news):
 					self.newsData = news
+					self.coreDataManager.deleteAllNews()
+					self.coreDataManager.saveNews(news.data?.news ?? [], context: CoreDataManager.shared.context)
 				case .failure(let error):
 					print("Ошибка загрузки новостей: \(error.localizedDescription)")
 				}
@@ -43,5 +57,9 @@ final class NewsViewModel: ObservableObject {
 			}
 		}
 	}
+	
+	// Очистка базы с новостями
+	func deleteNews() {
+		coreDataManager.deleteAllNews()
+	}
 }
-

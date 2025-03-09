@@ -28,19 +28,8 @@ struct NewsView: View {
 							}
 						} label: {
 							VStack(spacing: 20) {
-								if let flagURL = new.img, let url = URL(string: flagURL) {
-									AsyncImage(url: url) { image in
-										image
-											.resizable()
-											.scaledToFill()
-											.frame(height: 150)
-											.cornerRadius(5)
-									} placeholder: {
-										Rectangle()
-											.fill(Color.gray.opacity(0.3))
-											.frame(height: 150)
-											.cornerRadius(5)
-									}
+								if let imageURL = new.img, let url = URL(string: imageURL) {
+									CachedAsyncImage(url: url)
 								}
 								
 								VStack(alignment: .leading, spacing: 10) {
