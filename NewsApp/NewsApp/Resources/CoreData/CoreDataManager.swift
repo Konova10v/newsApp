@@ -50,7 +50,7 @@ extension CoreDataManager {
 			newEntity.annotation = news.annotation
 			newEntity.idResource = Int64(news.idResource ?? 0)
 			newEntity.type = Int64(news.type ?? 0)
-			newEntity.newsDateUts = 0
+			newEntity.newsDateUts = Int64(news.newsDateUts ?? "0") ?? 0
 			newEntity.mobileURL = news.mobileURL
 			newEntity.isHidden = false
 		}
@@ -66,23 +66,27 @@ extension CoreDataManager {
 		let context = persistentContainer.viewContext
 		let fetchRequest: NSFetchRequest<NewsEntity> = NewsEntity.fetchRequest()
 		fetchRequest.predicate = NSPredicate(format: "isHidden == NO")
-		
+
 		do {
 			let entities = try context.fetch(fetchRequest)
-			return entities.map { entity in
-				News(
-					id: Int(entity.id),
-					title: entity.title,
-					img: entity.img,
-					localImg: entity.localImg,
-					newsDate: entity.newsDate,
-					annotation: entity.annotation,
-					idResource: Int(entity.idResource),
-					type: Int(entity.type),
-					newsDateUts: String(entity.newsDateUts),
-					mobileURL: entity.mobileURL
-				)
-			}
+			return entities
+				.map { entity in
+					News(
+						id: Int(entity.id),
+						title: entity.title,
+						img: entity.img,
+						localImg: entity.localImg,
+						newsDate: entity.newsDate,
+						annotation: entity.annotation,
+						idResource: Int(entity.idResource),
+						type: Int(entity.type),
+						newsDateUts: String(entity.newsDateUts),
+						mobileURL: entity.mobileURL
+					)
+				}
+				.sorted { (news1, news2) -> Bool in
+					(Int(news1.newsDateUts ?? "0") ?? 0) > (Int(news2.newsDateUts ?? "0") ?? 0)
+				}
 		} catch {
 			print("Ошибка загрузки новостей из CoreData: \(error.localizedDescription)")
 			return []
@@ -111,6 +115,20 @@ extension CoreDataManager {
 			saveContext()
 		} catch {
 			print("Ошибка скрытия новости: \(error.localizedDescription)")
+		}
+	}
+	
+	func getHiddenNewsIDs() -> Set<Int> {
+		let context = persistentContainer.viewContext
+		let fetchRequest: NSFetchRequest<NewsEntity> = NewsEntity.fetchRequest()
+		fetchRequest.predicate = NSPredicate(format: "isHidden == YES")
+
+		do {
+			let hiddenNews = try context.fetch(fetchRequest)
+			return Set(hiddenNews.map { Int($0.id) })
+		} catch {
+			print("Ошибка получения скрытых новостей: \(error.localizedDescription)")
+			return []
 		}
 	}
 }

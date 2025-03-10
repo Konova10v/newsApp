@@ -33,8 +33,12 @@ final class NewsViewModel: ObservableObject {
 			DispatchQueue.main.async {
 				switch result {
 				case .success(let news):
+					let hiddenIDs = self.coreDataManager.getHiddenNewsIDs() // Список скрытых ID
+					let filteredNews = news.data?.news?.filter { !hiddenIDs.contains($0.id ?? 0) } ?? [] // Фильтр скрытых новостей
+
 					self.coreDataManager.deleteAllNews()
-					self.coreDataManager.saveNews(news.data?.news ?? [], context: self.coreDataManager.context)
+					self.coreDataManager.saveNews(filteredNews, context: self.coreDataManager.context)
+
 					self.loadNews()
 				case .failure(let error):
 					print("Ошибка загрузки новостей: \(error.localizedDescription)")

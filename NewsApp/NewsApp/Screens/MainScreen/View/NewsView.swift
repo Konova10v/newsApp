@@ -53,7 +53,7 @@ struct NewsView: View {
 					}
 				}
 			}
-			.searchable(text: $viewModel.searchQuery)
+			.searchable(text: $viewModel.searchQuery, prompt: "Поиск новости")
 			.navigationTitle("Новости")
 			.toolbar {
 				ToolbarItem(placement: .primaryAction) {
