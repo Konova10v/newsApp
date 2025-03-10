@@ -21,26 +21,33 @@ struct NewsView: View {
 					
 					Spacer()
 				} else {
-					List(viewModel.filteredNews) { new in
+					List(viewModel.filteredNews) { news in
 						Button {
-							if let siteURL = new.mobileURL, let url = URL(string: siteURL) {
+							if let siteURL = news.mobileURL, let url = URL(string: siteURL) {
 								selectedNewsURL = url
 							}
 						} label: {
 							VStack(spacing: 20) {
-								if let imageURL = new.img, let url = URL(string: imageURL) {
+								if let imageURL = news.img, let url = URL(string: imageURL) {
 									CachedAsyncImage(url: url)
 								}
 								
 								VStack(alignment: .leading, spacing: 10) {
-									Text(new.title ?? "")
+									Text(news.title ?? "")
 										.bold()
 									
-									Text(new.annotation ?? "")
+									Text(news.annotation ?? "")
 									
-									Text(new.newsDate ?? "")
+									Text(news.newsDate ?? "")
 										.font(.system(size: 11))
 								}
+							}
+						}
+						.swipeActions(edge: .trailing) {
+							Button(role: .destructive) {
+								viewModel.hideNews(id: news.id ?? 0)
+							} label: {
+								Label("Скрыть", systemImage: "eye.slash")
 							}
 						}
 					}

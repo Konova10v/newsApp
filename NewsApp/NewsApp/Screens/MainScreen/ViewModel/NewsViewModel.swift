@@ -10,18 +10,16 @@ import Foundation
 final class NewsViewModel: ObservableObject {
 	let networkManager = NetworkManager.shared
 	let coreDataManager = CoreDataManager.shared
-	
+
 	@Published var newsData: NewsModel = .placeholder
-	
 	@Published var searchQuery: String = ""
-	
+
 	init() {
 		loadNews()
 	}
-	
+
 	func loadNews() {
 		let savedNews = coreDataManager.fetchNews()
-		
 		if !savedNews.isEmpty {
 			self.newsData = NewsModel(success: true, data: DataClass(news: savedNews, count: savedNews.count, errorMsg: nil))
 		} else {
@@ -35,31 +33,32 @@ final class NewsViewModel: ObservableObject {
 			DispatchQueue.main.async {
 				switch result {
 				case .success(let news):
-					self.newsData = news
 					self.coreDataManager.deleteAllNews()
-					self.coreDataManager.saveNews(news.data?.news ?? [], context: CoreDataManager.shared.context)
+					self.coreDataManager.saveNews(news.data?.news ?? [], context: self.coreDataManager.context)
+					self.loadNews()
 				case .failure(let error):
 					print("Ошибка загрузки новостей: \(error.localizedDescription)")
 				}
 			}
 		}
 	}
-	
+
+	// Скрытие новости
+	func hideNews(id: Int) {
+		coreDataManager.hideNews(id: id)
+		loadNews()
+	}
+
 	// Метод для поиска новости но заголовку и аннотации
 	var filteredNews: [News] {
+		let news = newsData.data?.news ?? []
 		if searchQuery.isEmpty {
-			return newsData.data?.news ?? []
+			return news
 		} else {
-			let news: [News] = newsData.data?.news ?? []
 			return news.filter {
 				($0.title?.localizedCaseInsensitiveContains(searchQuery) == true) ||
 				($0.annotation?.localizedCaseInsensitiveContains(searchQuery) == true)
 			}
 		}
-	}
-	
-	// Очистка базы с новостями
-	func deleteNews() {
-		coreDataManager.deleteAllNews()
 	}
 }

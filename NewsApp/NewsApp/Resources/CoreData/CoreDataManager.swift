@@ -52,6 +52,7 @@ extension CoreDataManager {
 			newEntity.type = Int64(news.type ?? 0)
 			newEntity.newsDateUts = 0
 			newEntity.mobileURL = news.mobileURL
+			newEntity.isHidden = false
 		}
 		
 		do {
@@ -64,6 +65,7 @@ extension CoreDataManager {
 	func fetchNews() -> [News] {
 		let context = persistentContainer.viewContext
 		let fetchRequest: NSFetchRequest<NewsEntity> = NewsEntity.fetchRequest()
+		fetchRequest.predicate = NSPredicate(format: "isHidden == NO")
 		
 		do {
 			let entities = try context.fetch(fetchRequest)
@@ -97,6 +99,18 @@ extension CoreDataManager {
 			saveContext()
 		} catch {
 			print("Ошибка удаления новостей: \(error.localizedDescription)")
+		}
+	}
+	
+	func hideNews(id: Int) {
+		let request: NSFetchRequest<NewsEntity> = NewsEntity.fetchRequest()
+		request.predicate = NSPredicate(format: "id == %d", id)
+		do {
+			let results = try context.fetch(request)
+			results.forEach { $0.isHidden = true }
+			saveContext()
+		} catch {
+			print("Ошибка скрытия новости: \(error.localizedDescription)")
 		}
 	}
 }
