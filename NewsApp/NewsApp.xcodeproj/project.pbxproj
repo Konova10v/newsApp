@@ -15,7 +15,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				Resources/CoreData/NewsEntity.xcdatamodeld,
 			);
 			target = 6E3A9C282D7B31BB00E9D2D5 /* NewsApp */;
 		};
